@@ -18,11 +18,11 @@ var folders = map[string]string{
 	"error":       "errors",
 	"eventhandle": "eventhandles",
 	"event":       "events",
-	"factorie":    "factories",
+	"factory":     "factories",
 	"formatter":   "formatters",
 	"middleware":  "middlewares",
 	"model":       "models",
-	"repositorie": "repositories",
+	"repository":  "repositories",
 	"request":     "requests",
 	"service":     "services",
 }
@@ -114,16 +114,28 @@ func (obj *Framework) firstUppercase(s string) string {
 	return string(unicode.ToUpper(rune(s[0]))) + s[1:]
 }
 
+func usage() {
+	fmt.Sprintln("./fm --make [option] --name [name] --module [module]\n\noptions:\n\n\t-controller\n\t-dto\n\t-enum\n\t-error\n\t-eventhandler\n\t-event\n\t-factory\n\t-middleware\n\t-model\n\t-repository\n\t-request\n\t-service\n\nexamples:\n\n\t- ./fm -make module -name v1.module1\n\t- ./fm -make controller -name controller1 -module v1.modulwe1")
+
+}
+
 func main() {
 
 	var op string
 	var name string
 	var module string
+	var use *string
 
-	flag.StringVar(&op, "make", "", "-make controller")
-	flag.StringVar(&name, "name", "", "-name helloworld")
-	flag.StringVar(&module, "module", "", "-module v1.module1")
-	flag.Parse()
+	use = flag.String("usage", "", "--usage")
+	//flag.StringVar(&op, "make", "", "-make controller")
+	//flag.StringVar(&name, "name", "", "-name helloworld")
+	//flag.StringVar(&module, "module", "", "-module v1.module1")
+	//flag.Parse()
+
+	if *use != "" {
+		usage()
+		return
+	}
 
 	fm := NewFramework(op, name, module)
 	if op == "module" {
