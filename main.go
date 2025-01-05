@@ -134,15 +134,15 @@ func main() {
 
 	if *use != "" {
 		usage()
-		return
+	
 	}
 
-	fm := NewFramework(op, name, module)
-	if op == "module" {
-		fm.MakeModule()
-	} else {
-		fm.MakeOperation()
-	}
+	//fm := NewFramework(op, name, module)
+	//if op == "module" {
+		//fm.MakeModule()
+	//} else {
+		//fm.MakeOperation()
+	//}
 }
 
 // fm --make   controller --name helloworld --module help
