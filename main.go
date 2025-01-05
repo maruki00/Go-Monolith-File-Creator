@@ -115,7 +115,7 @@ func (obj *Framework) firstUppercase(s string) string {
 }
 
 func usage() {
-	fmt.Sprintln("./fm --make [option] --name [name] --module [module]\n\noptions:\n\n\t-controller\n\t-dto\n\t-enum\n\t-error\n\t-eventhandler\n\t-event\n\t-factory\n\t-middleware\n\t-model\n\t-repository\n\t-request\n\t-service\n\nexamples:\n\n\t- ./fm -make module -name v1.module1\n\t- ./fm -make controller -name controller1 -module v1.modulwe1")
+	fmt.Println("./fm --make [option] --name [name] --module [module]\noptions:\n\t-controller\n\t-dto\n\t-enum\n\t-error\n\t-eventhandler\n\t-event\n\t-factory\n\t-middleware\n\t-model\n\t-repository\n\t-request\n\t-service\n\nexamples:\n\t- ./fm -make module -name v1.module1\n\t- ./fm -make controller -name controller1 -module v1.modulwe1")
 
 }
 
@@ -126,23 +126,28 @@ func main() {
 	var module string
 	var use *string
 
-	use = flag.String("usage", "", "--usage")
-	//flag.StringVar(&op, "make", "", "-make controller")
-	//flag.StringVar(&name, "name", "", "-name helloworld")
-	//flag.StringVar(&module, "module", "", "-module v1.module1")
-	//flag.Parse()
+	use = flag.String("how", "", "--show usage")
+	flag.StringVar(&op, "make", "", "-make controller")
+	flag.StringVar(&name, "name", "", "-name helloworld")
+	flag.StringVar(&module, "module", "", "-module v1.module1")
+	flag.Parse()
 
-	if *use != "" {
+	if *use == "usage" {
 		usage()
-	
+		return
 	}
 
-	//fm := NewFramework(op, name, module)
-	//if op == "module" {
-		//fm.MakeModule()
-	//} else {
-		//fm.MakeOperation()
-	//}
+	if *use != "usage" && ( name == "" || op == "" ){
+		usage()
+		return
+	}
+
+	fm := NewFramework(op, name, module)
+	if op == "module" {
+		fm.MakeModule()
+	} else {
+		fm.MakeOperation()
+	}
 }
 
 // fm --make   controller --name helloworld --module help
