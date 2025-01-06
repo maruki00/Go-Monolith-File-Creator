@@ -27,6 +27,13 @@ var folders = map[string]string{
 	"service":     "services",
 }
 
+var projectFolders :=[]string {
+	"internal",
+	"configs",
+	"cmd",
+	"migrations",
+}
+
 type Framework struct {
 	Operation string
 	Name      string
@@ -119,6 +126,12 @@ func usage() {
 
 }
 
+func (obj *Framework)InitProject() {
+	for _, folder := range projectFolders {
+		os.Create(folder)
+	}
+}
+
 func main() {
 
 	var op string
@@ -143,6 +156,11 @@ func main() {
 	}
 
 	fm := NewFramework(op, name, module)
+	if op == "init" {
+		fm.InitProject()
+		return
+	}
+
 	if op == "module" {
 		fm.MakeModule()
 	} else {
