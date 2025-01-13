@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"unicode"
 )
@@ -25,6 +26,7 @@ var folders = map[string]string{
 	"repository":  "repositories",
 	"request":     "requests",
 	"service":     "services",
+	
 }
 
 var projectFolders :=[]string {
@@ -132,6 +134,14 @@ func (obj *Framework)InitProject() {
 	}
 }
 
+func ImplemementInterface(i interface{}) {
+	if i == nil {
+		return ""
+	}
+
+	files := reflect.FuncOf(i, reflect.TypeOf(i), bool)
+	
+}
 func main() {
 
 	var op string
