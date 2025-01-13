@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"reflect"
+	"path"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -27,10 +28,10 @@ var folders = map[string]string{
 	"repository":  "repositories",
 	"request":     "requests",
 	"service":     "services",
-	
+	"contract":    "contracts",
 }
 
-var projectFolders :=[]string {
+var projectFolders = []string{
 	"internal",
 	"configs",
 	"cmd",
@@ -95,15 +96,14 @@ func (obj *Framework) GetPackage(op string) string {
 	return strings.Join(paths, "_")
 }
 
-
-//here
+// here
 func (obj *Framework) MakeOperation(implementIface bool) {
 
 	op, ok := folders[strings.ToLower(obj.Operation)]
 	if !ok {
 		panic("Operation Not Supported")
 	}
-	path := obj.GetPath()
+	path := obj.GetPath(obj.Module)
 	name := strings.ToLower(obj.Name)
 
 	filePath := path + "/" + op + "/" + name + obj.firstUppercase(obj.Operation) + ".go"
@@ -116,7 +116,12 @@ func (obj *Framework) MakeOperation(implementIface bool) {
 	file, _ := os.Create(filePath)
 	defer file.Close()
 	_, _ = file.WriteString(fmt.Sprintf("package %s\n\n\ntype %s struct {\n\n\t//implementation goes here\n\n}\n\n", pkg, class))
-	impls := obj.ImplemementInterface(class)
+	if !implementIface {
+		return
+	}
+	impls := obj.ImplemementInterface(class, "")
+
+	fmt.Println("implementation : ", impls)
 
 }
 
@@ -128,13 +133,35 @@ func (obj *Framework) firstUppercase(s string) string {
 }
 
 func usage() {
-	fmt.Println("./fm --make [option] --name [name] --module [module]\noptions:\n\t-controller\n\t-dto\n\t-enum\n\t-error\n\t-eventhandler\n\t-event\n\t-factory\n\t-middleware\n\t-model\n\t-repository\n\t-request\n\t-service\n\nexamples:\n\t- ./fm -make module -name v1.module1\n\t- ./fm -make controller -name controller1 -module v1.modulwe1")
-
+	H := ` 
+	./fm --make [option] --name [name] --module [module]
+	options:
+		-controller
+		-dto
+		-enum
+		-error
+		-eventhandler
+		-event
+		-factory
+		-middleware
+		-model
+		-repository
+		-request
+		-service
+	examples:
+		- ./fm -make module -name v1.module1
+		- ./fm -make controller -name controller1 -module v1.module
+	`
+	fmt.Println(H)
 }
 
-func (obj *Framework)InitProject() {
+func (obj *Framework) InitProject() {
+	pathProject := obj.GetPath(obj.Module) + "/../"
+	os.MkdirAll(pathProject, 0754)
+	os.Chdir(pathProject)
+	fmt.Println("path Project : ", pathProject)
 	for _, folder := range projectFolders {
-		os.Create(folder)
+		os.Mkdir(path.Join(pathProject, folder), 0754)
 	}
 }
 
@@ -142,13 +169,11 @@ type Hello interface {
 	Sleep() int
 }
 
-
-
 func (obj *Framework) ImplemementInterface(pathIface string, class string) string {
-	path := obj.GetPath()
+	path := obj.GetPath(class)
 	fmt.Println(path)
+	return path
 }
-
 
 func GetInterfaceBody(path string) []string {
 	file, err := os.Open(path)
@@ -164,7 +189,7 @@ func GetInterfaceBody(path string) []string {
 	functions := make([]string, 0)
 	regex := `(\w+)\s*\(([^)]*)\)\s*(\w+)?\s*(error)?\s*$`
 	r := regexp.MustCompile(regex)
-	matches := r.FindAllStringSubmatch(interfaceCode, -1)
+	matches := r.FindAllStringSubmatch(string(data), -1)
 	for _, match := range matches {
 		functions = append(functions, strings.Join(match, " "))
 	}
@@ -183,7 +208,7 @@ func main() {
 	flag.StringVar(&op, "make", "", "-make controller")
 	flag.StringVar(&name, "name", "", "-name helloworld")
 	flag.StringVar(&module, "module", "", "-module v1.module1")
-	flag.StringVar(&iface, "interface", "", "-interface v1.module1.interfaces.iface1")
+	iface = flag.String("interface", "", "-interface v1.module1.interfaces.iface1")
 	flag.Parse()
 
 	if *use == "usage" {
@@ -191,13 +216,13 @@ func main() {
 		return
 	}
 
-	if *use != "usage" && ( name == "" || op == "" ){
+	if *use != "usage" && (name == "" || op == "") {
 		usage()
 		return
 	}
 
 	fm := NewFramework(op, name, module)
-	if op == "init" {
+	if op == "init" || op == "module" {
 		fm.InitProject()
 		return
 	}
@@ -205,12 +230,12 @@ func main() {
 	if op == "module" {
 		fm.MakeModule()
 	} else {
-		if iface != "" {
-			fm.MakeOperation()
-		}else {
-			fm.MakeOperation()
+		if *iface != "" {
+			fm.MakeOperation(true)
+		} else {
+			fm.MakeOperation(true)
 		}
-		
+
 	}
 }
 
