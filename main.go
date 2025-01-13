@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"strings"
@@ -50,11 +51,11 @@ func NewFramework(op, name, module string) *Framework {
 	}
 }
 
-func (obj *Framework) GetPath() string {
+func (obj *Framework) GetPath(module string) string {
 	root, _ := os.Getwd()
 	path := root + "/internal/"
 	os.Chdir(path)
-	paths := strings.Split(obj.Module, ".")
+	paths := strings.Split(module, ".")
 	path += strings.Join(paths, "/")
 	return path
 }
@@ -76,7 +77,7 @@ func (obj *Framework) MakeModuleDir() {
 }
 
 func (obj *Framework) MakeModule() {
-	path := obj.GetPath()
+	path := obj.GetPath(obj.Module)
 	_, err := os.Stat(path)
 	if !os.IsNotExist(err) {
 		panic("module already exists")
@@ -94,7 +95,9 @@ func (obj *Framework) GetPackage(op string) string {
 	return strings.Join(paths, "_")
 }
 
-func (obj *Framework) MakeOperation() {
+
+//here
+func (obj *Framework) MakeOperation(implementIface bool) {
 
 	op, ok := folders[strings.ToLower(obj.Operation)]
 	if !ok {
@@ -112,7 +115,8 @@ func (obj *Framework) MakeOperation() {
 
 	file, _ := os.Create(filePath)
 	defer file.Close()
-	_, _ = file.WriteString(fmt.Sprintf("package %s\n\n\ntype %s struct {\n\n\t//implementation goes here\n\n}", pkg, class))
+	_, _ = file.WriteString(fmt.Sprintf("package %s\n\n\ntype %s struct {\n\n\t//implementation goes here\n\n}\n\n", pkg, class))
+	impls := obj.ImplemementInterface(class)
 
 }
 
@@ -134,25 +138,52 @@ func (obj *Framework)InitProject() {
 	}
 }
 
-func ImplemementInterface(i interface{}) {
-	if i == nil {
-		return ""
+type Hello interface {
+	Sleep() int
+}
+
+
+
+func (obj *Framework) ImplemementInterface(pathIface string, class string) string {
+	path := obj.GetPath()
+	fmt.Println(path)
+}
+
+
+func GetInterfaceBody(path string) []string {
+	file, err := os.Open(path)
+	if err != nil {
+		panic("file doesnt eexists")
 	}
 
-	files := reflect.FuncOf(i, reflect.TypeOf(i), bool)
-	
+	data, err := io.ReadAll(file)
+	if err != nil {
+		panic("error reading the file")
+	}
+
+	functions := make([]string, 0)
+	regex := `(\w+)\s*\(([^)]*)\)\s*(\w+)?\s*(error)?\s*$`
+	r := regexp.MustCompile(regex)
+	matches := r.FindAllStringSubmatch(interfaceCode, -1)
+	for _, match := range matches {
+		functions = append(functions, strings.Join(match, " "))
+	}
+	return functions
 }
+
 func main() {
 
 	var op string
 	var name string
 	var module string
 	var use *string
+	var iface *string
 
 	use = flag.String("how", "", "--show usage")
 	flag.StringVar(&op, "make", "", "-make controller")
 	flag.StringVar(&name, "name", "", "-name helloworld")
 	flag.StringVar(&module, "module", "", "-module v1.module1")
+	flag.StringVar(&iface, "interface", "", "-interface v1.module1.interfaces.iface1")
 	flag.Parse()
 
 	if *use == "usage" {
@@ -174,7 +205,12 @@ func main() {
 	if op == "module" {
 		fm.MakeModule()
 	} else {
-		fm.MakeOperation()
+		if iface != "" {
+			fm.MakeOperation()
+		}else {
+			fm.MakeOperation()
+		}
+		
 	}
 }
 
