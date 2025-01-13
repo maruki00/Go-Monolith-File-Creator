@@ -54,9 +54,11 @@ func NewFramework(op, name, module string) *Framework {
 func (obj *Framework) GetPath(module string) string {
 	root, _ := os.Getwd()
 	path := root + "/internal/"
+	os.MkdirAll(path, 0754)
 	os.Chdir(path)
 	paths := strings.Split(module, ".")
 	path += strings.Join(paths, "/")
+	fmt.Println("this is the path for : ", module, path)
 	return path
 }
 
@@ -133,7 +135,7 @@ func (obj *Framework) firstUppercase(s string) string {
 
 func usage() {
 	H := ` 
-	./fm --make [option] --name [name] --module [module]
+	./fm -make [option] -name [name] -module [module]
 	options:
 		-controller
 		-dto
@@ -147,18 +149,18 @@ func usage() {
 		-repository
 		-request
 		-service
+		-contract
+		-init
 	examples:
 		- ./fm -make module -name v1.module1
 		- ./fm -make controller -name controller1 -module v1.module
+		- ./fm -make init -name controller1 -module v1.module
 	`
 	fmt.Println(H)
 }
 
 func (obj *Framework) InitProject() {
-	// pathProject := obj.GetPath(obj.Module) + "/../"
-	// os.MkdirAll(pathProject, 0754)
-	// os.Chdir(pathProject)
-	// fmt.Println("path Project : ", pathProject)
+
 	for _, folder := range projectFolders {
 		//os.Mkdir(path.Join(pathProject, folder), 0754)
 		os.MkdirAll(folder, 0754)
@@ -203,8 +205,10 @@ func main() {
 	var module string
 	var use *string
 	var iface *string
+	var initP *string
 
-	use = flag.String("how", "", "--show usage")
+	use = flag.String("show", "", "--show usage")
+	initP = flag.String("init", "", "--init usage")
 	flag.StringVar(&op, "make", "", "-make controller")
 	flag.StringVar(&name, "name", "", "-name helloworld")
 	flag.StringVar(&module, "module", "", "-module v1.module1")
@@ -215,15 +219,14 @@ func main() {
 		usage()
 		return
 	}
-
-	if *use != "usage" && (name == "" || op == "") {
-		usage()
+	fm := NewFramework(op, name, module)
+	if *initP != "" {
+		fm.InitProject()
 		return
 	}
 
-	fm := NewFramework(op, name, module)
-	if op == "init" || op == "module" {
-		fm.InitProject()
+	if *use != "usage" && (name == "" || op == "") {
+		usage()
 		return
 	}
 
