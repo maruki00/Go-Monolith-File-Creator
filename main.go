@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"regexp"
 	"strings"
 	"unicode"
@@ -156,12 +155,13 @@ func usage() {
 }
 
 func (obj *Framework) InitProject() {
-	pathProject := obj.GetPath(obj.Module) + "/../"
-	os.MkdirAll(pathProject, 0754)
-	os.Chdir(pathProject)
-	fmt.Println("path Project : ", pathProject)
+	// pathProject := obj.GetPath(obj.Module) + "/../"
+	// os.MkdirAll(pathProject, 0754)
+	// os.Chdir(pathProject)
+	// fmt.Println("path Project : ", pathProject)
 	for _, folder := range projectFolders {
-		os.Mkdir(path.Join(pathProject, folder), 0754)
+		//os.Mkdir(path.Join(pathProject, folder), 0754)
+		os.MkdirAll(folder, 0754)
 	}
 }
 
