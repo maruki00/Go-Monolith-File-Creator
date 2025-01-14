@@ -11,9 +11,6 @@ import (
 	"unicode"
 )
 
-// fm -make controller -name sdf -modue m1
-// fm -make module -name m2
-// fm -rm
 var folders = map[string]string{
 	"controller":  "controllers",
 	"dto":         "dtos",
@@ -65,7 +62,7 @@ func (obj *Framework) GetPath(module string) string {
 
 func (obj *Framework) MakeModuleDir(internalPath string) string {
 	paths := strings.Split(obj.Module, ".")
-	p := path.Join(internalPath, ...paths)
+	p := path.Join(internalPath, paths)
 	os.MkdirAll(p, 0755)
 	return p
 }
@@ -75,7 +72,7 @@ func (obj *Framework) MakeModule() {
 	os.MkdirAll(path, 0755)
 	modulePath := obj.MakeModuleDir(path)
 
-	os.
+	os.Chdir(modulePath)
 
 	for _, folder := range folders {
 		_ = os.Mkdir(fmt.Sprintf("%s/%s", path, folder), 0755)
@@ -89,7 +86,6 @@ func (obj *Framework) GetPackage(op string) string {
 	return strings.Join(paths, "_")
 }
 
-// here
 func (obj *Framework) MakeOperation(implementIface bool) {
 
 	op, ok := folders[strings.ToLower(obj.Operation)]
@@ -125,36 +121,9 @@ func (obj *Framework) firstUppercase(s string) string {
 	return string(unicode.ToUpper(rune(s[0]))) + s[1:]
 }
 
-func usage() {
-	H := ` 
-	./fm -make [option] -name [name] -module [module]
-	options:
-		-controller
-		-dto
-		-enum
-		-error
-		-eventhandler
-		-event
-		-factory
-		-middleware
-		-model
-		-repository
-		-request
-		-service
-		-contract
-		-init
-	examples:
-		- ./fm -make module -name v1.module1
-		- ./fm -make controller -name controller1 -module v1.module
-		- ./fm -make init -name controller1 -module v1.module
-	`
-	fmt.Println(H)
-}
-
 func (obj *Framework) InitProject() {
 
 	for _, folder := range projectFolders {
-		//os.Mkdir(path.Join(pathProject, folder), 0754)
 		os.MkdirAll(folder, 0754)
 	}
 }
@@ -188,6 +157,32 @@ func GetInterfaceBody(path string) []string {
 		functions = append(functions, strings.Join(match, " "))
 	}
 	return functions
+}
+
+func usage() {
+	H := ` 
+	./fm -make [option] -name [name] -module [module]
+	options:
+		-controller
+		-dto
+		-enum
+		-error
+		-eventhandler
+		-event
+		-factory
+		-middleware
+		-model
+		-repository
+		-request
+		-service
+		-contract
+		-init
+	examples:
+		- ./fm -make module -name v1.module1
+		- ./fm -make controller -name controller1 -module v1.module
+		- ./fm -make init -name controller1 -module v1.module
+	`
+	fmt.Println(H)
 }
 
 func main() {
@@ -233,6 +228,3 @@ func main() {
 
 	}
 }
-
-// fm --make   controller --name helloworld --module help
-// fm --remove controller --name helloworld
