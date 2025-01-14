@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 	"unicode"
@@ -62,29 +63,20 @@ func (obj *Framework) GetPath(module string) string {
 	return path
 }
 
-func (obj *Framework) MakeModuleDir() {
-	path, _ := os.Getwd()
-	os.Chdir(path)
+func (obj *Framework) MakeModuleDir(internalPath string) string {
 	paths := strings.Split(obj.Module, ".")
-	for _, p := range paths {
-		path += "/" + p
-		fmt.Println(path)
-		_, err := os.Stat(path)
-		if os.IsNotExist(err) {
-			_ = os.Mkdir(path, 0755)
-
-		}
-		os.Chdir(path)
-	}
+	p := path.Join(internalPath, ...paths)
+	os.MkdirAll(p, 0755)
+	return p
 }
 
 func (obj *Framework) MakeModule() {
 	path := obj.GetPath(obj.Module)
-	_, err := os.Stat(path)
-	if !os.IsNotExist(err) {
-		panic("module already exists")
-	}
-	obj.MakeModuleDir()
+	os.MkdirAll(path, 0755)
+	modulePath := obj.MakeModuleDir(path)
+
+	os.
+
 	for _, folder := range folders {
 		_ = os.Mkdir(fmt.Sprintf("%s/%s", path, folder), 0755)
 		_, _ = os.Create(fmt.Sprintf("%s/%s/.gitkeep", path, folder))
