@@ -39,6 +39,7 @@ type Framework struct {
 	Operation string
 	Name      string
 	Module    string
+	IFace     string
 }
 
 func NewFramework(op, name, module string) *Framework {
@@ -62,7 +63,9 @@ func (obj *Framework) GetPath(module string) string {
 
 func (obj *Framework) MakeModuleDir(internalPath string) string {
 	paths := strings.Split(obj.Module, ".")
-	p := path.Join(internalPath, paths)
+	paths = append([]string{internalPath}, paths...)
+	p := path.Join(paths...)
+	fmt.Println("full path : ", p, obj.Module)
 	os.MkdirAll(p, 0755)
 	return p
 }
@@ -206,6 +209,7 @@ func main() {
 		usage()
 		return
 	}
+
 	fm := NewFramework(op, name, module)
 	if *initP != "" {
 		fm.InitProject()
@@ -218,6 +222,7 @@ func main() {
 	}
 
 	if op == "module" {
+		fm.Module = name
 		fm.MakeModule()
 	} else {
 		if *iface != "" {
